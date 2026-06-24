@@ -1,23 +1,61 @@
+using Microsoft.EntityFrameworkCore;
+using TaskPlanner.BLL.Interfaces;
+using TaskPlanner.BLL.Services;
+using TaskPlanner.Core.Interfaces;
+using TaskPlanner.DAL.Context;
+using TaskPlanner.DAL.Mapping;
+using TaskPlanner.DAL.UnitOfWork;
+using TaskPlanner.WebApi.Mapping;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// 1. Налаштування бази даних SQLite
+// Створює файл TaskPlannerDb.db прямо в папці WebApi
+builder.Services.AddDbContext<TaskPlannerDbContext>(options =>
+    options.UseSqlite("Data Source=TaskPlannerDb.db"));
+
+// 2. Налаштування AutoMapper
+// Реєструємо відразу два профілі мапінгу: для DAL і для WebAPI
+builder.Services.AddAutoMapper(config =>
+{
+    config.AddProfile<DalMappingProfile>();
+    config.AddProfile<ApiMappingProfile>();
+});
+
+// 3. Реєстрація залежностей (Вбудований DI для Лаб 2.2)
+// У Лаб 2.4 ми замінимо цей блок на Autofac/Ninject
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<ITaskService, TaskService>();
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(); // Інтерфейс для тестування
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// АВТОМАТИЧНЕ СТВОРЕННЯ БАЗИ ДАНИХ ПРИ ЗАПУСКУ
+// Це необхідно для SQLite, щоб не запускати міграції вручну
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<TaskPlannerDbContext>();
+    context.Database.EnsureCreated();
+}
+
+// Налаштування Swagger (UI для тестування API)
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+// ДОЗВОЛЯЄМО РОЗДАЧУ ФРОНТЕНДУ З ПАПКИ wwwroot
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
+app.UseAuthorization();
 app.MapControllers();
 
 app.Run();

@@ -1,0 +1,14 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using TaskPlanner.Core.DomainModels;
+
+namespace TaskPlanner.BLL.Interfaces
+{
+    public interface IProjectService
+    {
+        Task<IEnumerable<Project>> GetAllProjectsAsync();
+        Task<Project?> GetProjectByIdAsync(int id);
+        Task AddProjectAsync(Project project);
+        Task DeleteProjectAsync(int id);
+    }
+}
