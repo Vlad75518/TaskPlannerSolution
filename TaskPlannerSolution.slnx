@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="TaskPlanner.BLL/TaskPlanner.BLL.csproj" />
+  <Project Path="TaskPlanner.Core/TaskPlanner.Core.csproj" />
+  <Project Path="TaskPlanner.DAL/TaskPlanner.DAL.csproj" />
+  <Project Path="TaskPlanner.WebApi/TaskPlanner.WebApi.csproj" />
+</Solution>
