@@ -43,12 +43,16 @@ namespace TaskPlanner.DAL.Repositories
 
         public void Update(TDomain domainModel)
         {
+            _context.ChangeTracker.Clear();
+
             var entity = _mapper.Map<TEntity>(domainModel);
             _dbSet.Update(entity);
         }
 
         public void Delete(TDomain domainModel)
         {
+            _context.ChangeTracker.Clear();
+
             var entity = _mapper.Map<TEntity>(domainModel);
             _dbSet.Remove(entity);
         }

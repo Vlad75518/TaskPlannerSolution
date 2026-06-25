@@ -3,107 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Планувальник завдань</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>TaskPlanner</title>
+    <!-- Inter — сучасний шрифт, той самий що у Claude -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="bg-slate-100 h-screen flex overflow-hidden font-sans">
+<body>
 
-    <aside class="w-1/4 bg-white shadow-xl flex flex-col">
-        <div class="p-6 bg-blue-600 text-white">
-            <h1 class="text-2xl font-bold">Мої Проєкти</h1>
-            <p class="text-blue-200 text-sm mt-1">Оберіть проєкт для перегляду завдань</p>
-        </div>
+    <!--
+    ╔══════════════════════════════════════════════╗
+    ║  ГОЛОВНИЙ МАКЕТ: сітка з двох колонок        ║
+    ║  [Бокова панель 272px] [Основний вміст 1fr]  ║
+    ╚══════════════════════════════════════════════╝
+    -->
+    <div class="app-layout">
 
-        <div class="p-4">
-            <button onclick="openModal('projectModal')" class="w-full bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 font-semibold py-2 px-4 rounded-lg transition-colors">
-                + Новий проєкт
-            </button>
-        </div>
+        <!-- ══════════════════════════════════════
+             БОКОВА ПАНЕЛЬ — список проєктів
+             ══════════════════════════════════════ -->
+        <aside class="sidebar" role="navigation" aria-label="Список проєктів">
 
-        <ul id="projectsList" class="flex-1 overflow-y-auto p-4 space-y-2">
-        </ul>
-    </aside>
-
-    <main class="flex-1 flex flex-col h-screen">
-        <header class="bg-white shadow-sm p-6 flex justify-between items-center z-10">
-            <div>
-                <h2 id="currentProjectTitle" class="text-2xl font-bold text-gray-800">Оберіть проєкт зліва</h2>
-                <p id="currentProjectDesc" class="text-gray-500 mt-1"></p>
-            </div>
-            <button id="btnAddTask" onclick="openModal('taskModal')" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-colors">
-                + Додати завдання
-            </button>
-        </header>
-
-        <div id="kanbanBoard" class="flex-1 p-6 flex gap-6 overflow-x-auto hidden">
-            <div class="flex-1 bg-gray-50 rounded-xl p-4 flex flex-col shadow-inner min-w-[300px]">
-                <h3 class="font-bold text-gray-700 mb-4 flex items-center"><span class="w-3 h-3 rounded-full bg-gray-400 mr-2"></span>Не розпочате</h3>
-                <div id="tasks-status-0" class="flex-1 space-y-3 overflow-y-auto pb-4"></div>
-            </div>
-
-            <div class="flex-1 bg-blue-50 rounded-xl p-4 flex flex-col shadow-inner min-w-[300px]">
-                <h3 class="font-bold text-blue-700 mb-4 flex items-center"><span class="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>У виконанні</h3>
-                <div id="tasks-status-1" class="flex-1 space-y-3 overflow-y-auto pb-4"></div>
-            </div>
-
-            <div class="flex-1 bg-green-50 rounded-xl p-4 flex flex-col shadow-inner min-w-[300px]">
-                <h3 class="font-bold text-green-700 mb-4 flex items-center"><span class="w-3 h-3 rounded-full bg-green-500 mr-2"></span>Завершене</h3>
-                <div id="tasks-status-2" class="flex-1 space-y-3 overflow-y-auto pb-4"></div>
-            </div>
-        </div>
-
-        <div id="noProjectSelectedMsg" class="flex-1 flex items-center justify-center text-gray-400 text-lg">
-            👈 Будь ласка, оберіть проєкт зі списку ліворуч або створіть новий
-        </div>
-    </main>
-
-    <div id="projectModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-2xl p-6 w-96">
-            <h2 class="text-xl font-bold mb-4">Новий проєкт</h2>
-            <form id="formCreateProject" onsubmit="createProject(event)">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Назва</label>
-                    <input type="text" id="projName" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <!-- Логотип застосунку -->
+            <div class="sidebar-header">
+                <div class="app-logo">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" aria-hidden="true">
+                        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                    </svg>
+                    <span class="app-name">TaskPlanner</span>
                 </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Опис</label>
-                    <textarea id="projDesc" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+            </div>
+
+            <!-- Кнопка створення нового проєкту -->
+            <div class="sidebar-actions">
+                <button class="btn-new-project" onclick="openModal('project')"
+                        aria-label="Створити новий проєкт">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5" width="15" height="15" aria-hidden="true">
+                        <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    Новий проєкт
+                </button>
+            </div>
+
+            <!-- Список проєктів (динамічно заповнюється з JS) -->
+            <nav class="project-nav">
+                <p class="nav-section-label">Проєкти</p>
+                <ul id="projects-list" class="projects-list" role="list">
+                    <!-- Елементи вставляються через renderProjects() -->
+                </ul>
+            </nav>
+
+        </aside>
+
+
+        <!-- ══════════════════════════════════════
+             ОСНОВНИЙ ВМІСТ — канбан-дошка
+             ══════════════════════════════════════ -->
+        <main class="main-content" role="main">
+
+            <!-- Верхня панель: назва поточного проєкту + кнопка додавання завдання -->
+            <header class="topbar">
+                <div class="topbar-info">
+                    <h1 id="current-project-title" class="project-title">Оберіть проєкт</h1>
+                    <p id="current-project-desc" class="project-desc"></p>
                 </div>
-                <div class="flex justify-end gap-2">
-                    <button type="button" onclick="closeModal('projectModal')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Скасувати</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Зберегти</button>
+                <button id="btn-add-task" class="btn-primary hidden"
+                        onclick="openModal('task')" aria-label="Додати нове завдання">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5" width="15" height="15" aria-hidden="true">
+                        <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    Додати завдання
+                </button>
+            </header>
+
+            <!-- Порожній стан: показується коли жоден проєкт не обрано -->
+            <div id="empty-state" class="empty-state" role="status">
+                <div class="empty-state-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                         width="28" height="28">
+                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                        <rect x="9" y="3" width="6" height="4" rx="1" />
+                        <path d="M9 12h6M9 16h4" />
+                    </svg>
                 </div>
-            </form>
+                <h2 class="empty-state-title">Проєкт не обрано</h2>
+                <p class="empty-state-text">
+                    Оберіть проєкт зі списку ліворуч або створіть новий, щоб почати планування
+                </p>
+                <button class="btn-primary" onclick="openModal('project')">
+                    Створити перший проєкт
+                </button>
+            </div>
+
+            <!-- Канбан-дошка: три колонки за статусом завдань -->
+            <div id="kanban-board" class="kanban-board hidden" role="region"
+                 aria-label="Канбан-дошка завдань">
+
+                <!-- Колонка 1: Не розпочато -->
+                <div class="kanban-column">
+                    <div class="column-header">
+                        <div class="column-header-left">
+                            <span class="column-dot dot-neutral" aria-hidden="true"></span>
+                            <h2 class="column-title">Не розпочато</h2>
+                        </div>
+                        <span class="column-badge" id="count-0" aria-label="кількість завдань">0</span>
+                    </div>
+                    <div class="column-body drop-zone" id="tasks-status-0"
+                         role="list" aria-label="Завдання «Не розпочато»"
+                         ondragover="handleDragOver(event)"
+                         ondragleave="handleDragLeave(event)"
+                         ondrop="handleDrop(event, 0)">
+                    </div>
+                </div>
+
+                <!-- Колонка 2: У виконанні -->
+                <div class="kanban-column">
+                    <div class="column-header">
+                        <div class="column-header-left">
+                            <span class="column-dot dot-sage" aria-hidden="true"></span>
+                            <h2 class="column-title">У виконанні</h2>
+                        </div>
+                        <span class="column-badge column-badge--sage" id="count-1"
+                              aria-label="кількість завдань">0</span>
+                    </div>
+                    <div class="column-body drop-zone" id="tasks-status-1"
+                         role="list" aria-label="Завдання «У виконанні»"
+                         ondragover="handleDragOver(event)"
+                         ondragleave="handleDragLeave(event)"
+                         ondrop="handleDrop(event, 1)">
+                    </div>
+                </div>
+
+                <!-- Колонка 3: Завершено -->
+                <div class="kanban-column">
+                    <div class="column-header">
+                        <div class="column-header-left">
+                            <span class="column-dot dot-burgundy" aria-hidden="true"></span>
+                            <h2 class="column-title">Завершено</h2>
+                        </div>
+                        <span class="column-badge column-badge--burgundy" id="count-2"
+                              aria-label="кількість завдань">0</span>
+                    </div>
+                    <div class="column-body drop-zone" id="tasks-status-2"
+                         role="list" aria-label="Завдання «Завершено»"
+                         ondragover="handleDragOver(event)"
+                         ondragleave="handleDragLeave(event)"
+                         ondrop="handleDrop(event, 2)">
+                    </div>
+                </div>
+
+            </div><!-- /.kanban-board -->
+
+        </main>
+    </div><!-- /.app-layout -->
+    <!--
+    ╔══════════════════════════════════════════════╗
+    ║  МОДАЛЬНЕ ВІКНО: Новий проєкт               ║
+    ╚══════════════════════════════════════════════╝
+    -->
+    <div id="modal-project" class="modal-overlay hidden"
+         role="dialog" aria-modal="true" aria-labelledby="modal-project-heading"
+         onclick="closeModalOnOverlay(event, 'project')">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-project-heading" class="modal-title">Новий проєкт</h2>
+                <button class="modal-close-btn" onclick="closeModal('project')"
+                        aria-label="Закрити">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" width="18" height="18" aria-hidden="true">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="proj-name">
+                        Назва проєкту
+                    </label>
+                    <input type="text" id="proj-name" class="form-input"
+                           placeholder="Наприклад: Редизайн сайту" maxlength="100"
+                           autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="proj-desc">
+                        Опис
+                        <span class="form-label-hint">(необов'язково)</span>
+                    </label>
+                    <textarea id="proj-desc" class="form-textarea" rows="3"
+                              placeholder="Короткий опис мети проєкту..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" onclick="closeModal('project')">
+                    Скасувати
+                </button>
+                <button class="btn-primary" onclick="handleCreateProject()">
+                    Створити
+                </button>
+            </div>
         </div>
     </div>
 
-    <div id="taskModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-2xl p-6 w-[28rem]">
-            <h2 id="taskModalTitle" class="text-xl font-bold mb-4">Нове завдання</h2>
-            <form id="formTask" onsubmit="saveTask(event)">
-                <input type="hidden" id="taskId">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Назва завдання</label>
-                    <input type="text" id="taskTitle" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+    <!--
+    ╔══════════════════════════════════════════════╗
+    ║  МОДАЛЬНЕ ВІКНО: Нове / редагувати завдання ║
+    ╚══════════════════════════════════════════════╝
+    -->
+    <div id="modal-task" class="modal-overlay hidden"
+         role="dialog" aria-modal="true" aria-labelledby="modal-task-heading"
+         onclick="closeModalOnOverlay(event, 'task')">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-task-heading" class="modal-title">Нове завдання</h2>
+                <button class="modal-close-btn" onclick="closeModal('task')"
+                        aria-label="Закрити">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" width="18" height="18" aria-hidden="true">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <!-- Прихований ID (заповнюється при редагуванні) -->
+                <input type="hidden" id="task-id">
+
+                <div class="form-group">
+                    <label class="form-label" for="task-title">
+                        Назва завдання
+                    </label>
+                    <input type="text" id="task-title" class="form-input"
+                           placeholder="Що потрібно зробити?" maxlength="200"
+                           autocomplete="off">
                 </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Опис</label>
-                    <textarea id="taskDesc" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+
+                <div class="form-group">
+                    <label class="form-label" for="task-desc">
+                        Опис
+                        <span class="form-label-hint">(необов'язково)</span>
+                    </label>
+                    <textarea id="task-desc" class="form-textarea" rows="3"
+                              placeholder="Деталі, посилання, нотатки..."></textarea>
                 </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Пріоритет</label>
-                    <select id="taskPriority" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="0">Низький</option>
-                        <option value="1" selected>Середній</option>
-                        <option value="2">Високий</option>
-                    </select>
+
+                <div class="form-group">
+                    <p class="form-label">Пріоритет</p>
+                    <div class="priority-selector" role="radiogroup"
+                         aria-label="Оберіть пріоритет">
+                        <button class="priority-btn" data-value="0"
+                                onclick="selectPriority(0)"
+                                role="radio" aria-checked="false">
+                            <span class="priority-dot priority-dot--low" aria-hidden="true"></span>
+                            Низький
+                        </button>
+                        <button class="priority-btn priority-btn--active" data-value="1"
+                                onclick="selectPriority(1)"
+                                role="radio" aria-checked="true">
+                            <span class="priority-dot priority-dot--medium" aria-hidden="true"></span>
+                            Середній
+                        </button>
+                        <button class="priority-btn" data-value="2"
+                                onclick="selectPriority(2)"
+                                role="radio" aria-checked="false">
+                            <span class="priority-dot priority-dot--high" aria-hidden="true"></span>
+                            Високий
+                        </button>
+                    </div>
+                    <!-- Прихований input зберігає обране числове значення -->
+                    <input type="hidden" id="task-priority" value="1">
                 </div>
-                <div class="flex justify-end gap-2">
-                    <button type="button" onclick="closeModal('taskModal')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Скасувати</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Зберегти</button>
-                </div>
-            </form>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" onclick="closeModal('task')">
+                    Скасувати
+                </button>
+                <button class="btn-primary" onclick="handleSaveTask()">
+                    Зберегти
+                </button>
+            </div>
         </div>
     </div>
 
