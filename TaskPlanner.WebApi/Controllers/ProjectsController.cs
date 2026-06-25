@@ -60,7 +60,6 @@ namespace TaskPlanner.WebApi.Controllers
             }
         }
 
-        // ДОДАНО: Метод DELETE для відповідності на "відмінно"
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteProject(int id)
         {
@@ -71,7 +70,7 @@ namespace TaskPlanner.WebApi.Controllers
             }
             catch (ArgumentException ex)
             {
-                return NotFound(ex.Message); // Повертаємо 404, якщо не знайдено
+                return NotFound(ex.Message);
             }
         }
     }

@@ -22,7 +22,7 @@ namespace TaskPlanner.BLL.Services
         {
             var allTasks = await _unitOfWork.Repository<TaskItem>().GetAllAsync();
 
-            // Вимога: "Відображати тільки ті завдання, які стосуються конкретного проекту"
+            // Відображати тільки ті завдання, які стосуються конкретного проекту
             return allTasks.Where(t => t.ProjectId == projectId);
         }
 
@@ -45,7 +45,6 @@ namespace TaskPlanner.BLL.Services
 
         public async Task AddTaskAsync(int projectId, TaskItem task)
         {
-            // Перевіряємо, чи існує такий проєкт взагалі (Бізнес-правило)
             var project = await _unitOfWork.Repository<Project>().GetByIdAsync(projectId);
             if (project == null)
             {
@@ -76,14 +75,12 @@ namespace TaskPlanner.BLL.Services
 
         public async Task UpdateTaskAsync(TaskItem task)
         {
-            // Перевіряємо, чи існує завдання
             var existingTask = await _unitOfWork.Repository<TaskItem>().GetByIdAsync(task.Id);
             if (existingTask == null)
             {
                 throw new ArgumentException("Завдання не знайдено.");
             }
 
-            // Оновлюємо дозволені поля
             existingTask.Title = task.Title;
             existingTask.Description = task.Description;
             existingTask.Priority = task.Priority;

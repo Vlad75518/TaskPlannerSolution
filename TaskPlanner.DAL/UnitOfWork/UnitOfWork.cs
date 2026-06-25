@@ -63,7 +63,7 @@ namespace TaskPlanner.DAL.UnitOfWork
         public void Dispose()
         {
             _context.Dispose();
-            GC.SuppressFinalize(this); // Гарна практика при IDisposable
+            GC.SuppressFinalize(this); //
         }
     }
 }

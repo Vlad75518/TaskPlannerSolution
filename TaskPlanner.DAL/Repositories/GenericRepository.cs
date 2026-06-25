@@ -12,7 +12,7 @@ namespace TaskPlanner.DAL.Repositories
         where TDomain : class
     {
         private readonly TaskPlannerDbContext _context;
-        private readonly IMapper _mapper; // Автомапер як об'єкт
+        private readonly IMapper _mapper;
         private readonly DbSet<TEntity> _dbSet;
 
         public GenericRepository(TaskPlannerDbContext context, IMapper mapper)
@@ -25,8 +25,7 @@ namespace TaskPlanner.DAL.Repositories
         public async Task<IEnumerable<TDomain>> GetAllAsync()
         {
             var entities = await _dbSet.ToListAsync();
-            // Мапимо список сутностей БД у список бізнес-моделей
-            return _mapper.Map<IEnumerable<TDomain>>(entities);
+            return _mapper.Map<IEnumerable<TDomain>>(entities); // Мапимо список сутностей БД у список бізнес-моделей
         }
 
         public async Task<TDomain?> GetByIdAsync(int id)

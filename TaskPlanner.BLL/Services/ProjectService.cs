@@ -31,7 +31,6 @@ namespace TaskPlanner.BLL.Services
         {
             await _unitOfWork.Repository<Project>().AddAsync(project);
 
-            // Обов'язково викликаємо Commit, інакше дані не збережуться!
             await _unitOfWork.CommitAsync();
         }
 

@@ -9,12 +9,10 @@ using TaskPlanner.WebApi.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Налаштування бази даних SQLite
-// Створює файл TaskPlannerDb.db прямо в папці WebApi
 builder.Services.AddDbContext<TaskPlannerDbContext>(options =>
     options.UseSqlite("Data Source=TaskPlannerDb.db"));
 
-// 2. Налаштування AutoMapper
+// Налаштування AutoMapper
 // Реєструємо відразу два профілі мапінгу: для DAL і для WebAPI
 builder.Services.AddAutoMapper(config =>
 {
@@ -22,8 +20,7 @@ builder.Services.AddAutoMapper(config =>
     config.AddProfile<ApiMappingProfile>();
 });
 
-// 3. Реєстрація залежностей (Вбудований DI для Лаб 2.2)
-// У Лаб 2.4 ми замінимо цей блок на Autofac/Ninject
+// Реєстрація залежностей
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
@@ -34,8 +31,6 @@ builder.Services.AddSwaggerGen(); // Інтерфейс для тестуван�
 
 var app = builder.Build();
 
-// АВТОМАТИЧНЕ СТВОРЕННЯ БАЗИ ДАНИХ ПРИ ЗАПУСКУ
-// Це необхідно для SQLite, щоб не запускати міграції вручну
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<TaskPlannerDbContext>();
@@ -51,7 +46,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// ДОЗВОЛЯЄМО РОЗДАЧУ ФРОНТЕНДУ З ПАПКИ wwwroot
 app.UseDefaultFiles();
 app.UseStaticFiles();
 

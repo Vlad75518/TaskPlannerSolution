@@ -20,7 +20,7 @@ namespace TaskPlanner.WebApi.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/search/tasks?q=щось
+        // GET: api/search/tasks?q=
         [HttpGet("tasks")]
         public async Task<ActionResult<IEnumerable<TaskItemDto>>> SearchTasks([FromQuery] string q)
         {

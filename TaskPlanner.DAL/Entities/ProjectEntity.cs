@@ -17,7 +17,7 @@ namespace TaskPlanner.DAL.Entities
 
         public DateTime CreatedAt { get; set; }
 
-        // Навігаційна властивість: один проєкт має багато завдань
+        // Один проєкт має багато завдань
         public ICollection<TaskEntity> Tasks { get; set; } = new List<TaskEntity>();
     }
 }

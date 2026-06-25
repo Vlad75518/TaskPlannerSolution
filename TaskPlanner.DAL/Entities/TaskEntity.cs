@@ -15,7 +15,6 @@ namespace TaskPlanner.DAL.Entities
 
         public string? Description { get; set; }
 
-        // Entity Framework чудово вміє зберігати Enums в базу (як числа)
         public TaskPriority Priority { get; set; }
         public TaskItemStatus Status { get; set; }
 
@@ -23,7 +22,6 @@ namespace TaskPlanner.DAL.Entities
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
 
-        // Навігаційна властивість
         public ProjectEntity? Project { get; set; }
     }
 }
