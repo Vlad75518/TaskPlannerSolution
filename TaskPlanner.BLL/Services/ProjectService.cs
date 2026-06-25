@@ -29,9 +29,9 @@ namespace TaskPlanner.BLL.Services
 
         public async Task AddProjectAsync(Project project)
         {
-            await _unitOfWork.Repository<Project>().AddAsync(project);
+            _unitOfWork.Repository<Project>().Add(project);
 
-            await _unitOfWork.CommitAsync();
+            await _unitOfWork.CompleteAsync();
         }
 
         public async Task UpdateProjectAsync(Project project)
@@ -48,7 +48,7 @@ namespace TaskPlanner.BLL.Services
             existingProject.Description = project.Description;
 
             repository.Update(existingProject);
-            await _unitOfWork.CommitAsync();
+            await _unitOfWork.CompleteAsync();
         }
 
         public async Task DeleteProjectAsync(int id)
@@ -60,8 +60,8 @@ namespace TaskPlanner.BLL.Services
                 throw new ArgumentException($"Проєкт з ID {id} не знайдено.");
             }
 
-            repository.Delete(project);
-            await _unitOfWork.CommitAsync();
+            await repository.DeleteAsync(id);
+            await _unitOfWork.CompleteAsync();
         }
     }
 }

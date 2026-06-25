@@ -1,23 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace TaskPlanner.DAL.Entities
 {
     public class ProjectEntity
     {
-        [Key]
         public int Id { get; set; }
-
-        [Required]
-        [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
-
         public string? Description { get; set; }
-
         public DateTime CreatedAt { get; set; }
 
-        // Один проєкт має багато завдань
-        public ICollection<TaskEntity> Tasks { get; set; } = new List<TaskEntity>();
+        // Ми прибрали ICollection<TaskEntity> Tasks. 
+        // Зв'язок буде одностороннім з боку Завдання. Це покращує швидкодію.
     }
 }

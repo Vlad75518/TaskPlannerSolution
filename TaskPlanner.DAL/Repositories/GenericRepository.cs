@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TaskPlanner.Core.Interfaces;
-using TaskPlanner.DAL.Context;
 
 namespace TaskPlanner.DAL.Repositories
 {
@@ -11,49 +10,58 @@ namespace TaskPlanner.DAL.Repositories
         where TEntity : class
         where TDomain : class
     {
-        private readonly TaskPlannerDbContext _context;
-        private readonly IMapper _mapper;
         private readonly DbSet<TEntity> _dbSet;
+        private readonly IMapper _mapper;
 
-        public GenericRepository(TaskPlannerDbContext context, IMapper mapper)
+        // Зверніть увагу: _context більше не зберігається як поле класу!
+        public GenericRepository(DbContext context, IMapper mapper)
         {
-            _context = context;
+            _dbSet = context.Set<TEntity>();
             _mapper = mapper;
-            _dbSet = _context.Set<TEntity>();
         }
 
         public async Task<IEnumerable<TDomain>> GetAllAsync()
         {
-            var entities = await _dbSet.ToListAsync();
-            return _mapper.Map<IEnumerable<TDomain>>(entities); // Мапимо список сутностей БД у список бізнес-моделей
+            // AsNoTracking - рятує пам'ять і роботу Garbage Collector'а
+            var entities = await _dbSet.AsNoTracking().ToListAsync();
+            return _mapper.Map<IEnumerable<TDomain>>(entities);
         }
 
         public async Task<TDomain?> GetByIdAsync(int id)
         {
+            // Шукаємо сутність (EF Core оптимізує FindAsync)
             var entity = await _dbSet.FindAsync(id);
+
+            // Якщо знайшли - від'єднуємо від трекера (щоб не було проблем при Update)
+            if (entity != null)
+            {
+                _dbSet.Entry(entity).State = EntityState.Detached;
+            }
+
             return entity == null ? null : _mapper.Map<TDomain>(entity);
         }
 
-        public async Task AddAsync(TDomain domainModel)
+        // Add СИНХРОННИЙ згідно з рекомендаціями EF Core
+        public void Add(TDomain domainModel)
         {
             var entity = _mapper.Map<TEntity>(domainModel);
-            await _dbSet.AddAsync(entity);
+            _dbSet.Add(entity);
         }
 
         public void Update(TDomain domainModel)
         {
-            _context.ChangeTracker.Clear();
-
             var entity = _mapper.Map<TEntity>(domainModel);
             _dbSet.Update(entity);
         }
 
-        public void Delete(TDomain domainModel)
+        // Delete по ID без перегонки цілої моделі туди-сюди
+        public async Task DeleteAsync(int id)
         {
-            _context.ChangeTracker.Clear();
-
-            var entity = _mapper.Map<TEntity>(domainModel);
-            _dbSet.Remove(entity);
+            var entity = await _dbSet.FindAsync(id);
+            if (entity != null)
+            {
+                _dbSet.Remove(entity);
+            }
         }
     }
 }

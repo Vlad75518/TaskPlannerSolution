@@ -9,19 +9,16 @@ namespace TaskPlanner.Core.Interfaces
     /// </summary>
     public interface IRepository<T> where T : class
     {
-        // Отримати всі записи
+        // Читання залишається асинхронним
         Task<IEnumerable<T>> GetAllAsync();
-
-        // Отримати один запис за його ідентифікатором
         Task<T?> GetByIdAsync(int id);
 
-        // Додати новий запис
-        Task AddAsync(T entity);
+        // ВАЖЛИВО: Add тепер СИНХРОННИЙ! (Вимога Microsoft)
+        void Add(T entity);
 
-        // Оновити існуючий запис
         void Update(T entity);
 
-        // Видалити запис
-        void Delete(T entity);
+        // ВАЖЛИВО: Delete тепер приймає ID, а не цілу модель!
+        Task DeleteAsync(int id);
     }
 }

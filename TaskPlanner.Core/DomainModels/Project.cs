@@ -8,11 +8,6 @@ namespace TaskPlanner.Core.DomainModels
         public int Id { get; set; }
         public string? Name { get; set; }
         public string? Description { get; set; }
-        public DateTime CreatedAt { get; set; }
-
-        public Project()
-        {
-            CreatedAt = DateTime.UtcNow;
-        }
+        public DateTime CreatedAt { get; init; }
     }
 }

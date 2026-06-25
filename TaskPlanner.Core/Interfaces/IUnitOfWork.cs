@@ -9,10 +9,9 @@ namespace TaskPlanner.Core.Interfaces
     /// </summary>
     public interface IUnitOfWork : IDisposable
     {
-        // Універсальний метод отримання репозиторію для будь-якої бізнес-моделі
         IRepository<T> Repository<T>() where T : class;
 
-        // Збереження всіх накопичених змін у базу даних (еквівалент SaveChanges)
-        Task<int> CommitAsync();
+        // Перейменовано з CommitAsync на правильний термін
+        Task<int> CompleteAsync();
     }
 }

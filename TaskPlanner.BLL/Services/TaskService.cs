@@ -53,8 +53,8 @@ namespace TaskPlanner.BLL.Services
 
             task.ProjectId = projectId;
 
-            await _unitOfWork.Repository<TaskItem>().AddAsync(task);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Repository<TaskItem>().Add(task);
+            await _unitOfWork.CompleteAsync();
         }
 
         public async Task ChangeTaskStatusAsync(int taskId, TaskItemStatus newStatus)
@@ -70,7 +70,7 @@ namespace TaskPlanner.BLL.Services
             task.Status = newStatus;
 
             repository.Update(task);
-            await _unitOfWork.CommitAsync();
+            await _unitOfWork.CompleteAsync();
         }
 
         public async Task UpdateTaskAsync(TaskItem task)
@@ -86,7 +86,7 @@ namespace TaskPlanner.BLL.Services
             existingTask.Priority = task.Priority;
 
             _unitOfWork.Repository<TaskItem>().Update(existingTask);
-            await _unitOfWork.CommitAsync();
+            await _unitOfWork.CompleteAsync();
         }
         public async Task DeleteTaskAsync(int taskId)
         {
@@ -94,11 +94,11 @@ namespace TaskPlanner.BLL.Services
             var task = await repository.GetByIdAsync(taskId);
             if (task == null)
             {
-                throw new ArgumentException($"Проєкт з ID {taskId} не знайдено.");
+                throw new ArgumentException($"Завдання з ID {taskId} не знайдено.");
             }
 
-            repository.Delete(task);
-            await _unitOfWork.CommitAsync();
+            await repository.DeleteAsync(taskId);
+            await _unitOfWork.CompleteAsync();
         }
     }
 }
