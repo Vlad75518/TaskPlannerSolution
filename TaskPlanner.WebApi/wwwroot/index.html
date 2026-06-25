@@ -69,18 +69,33 @@
 
             <!-- Верхня панель: назва поточного проєкту + кнопка додавання завдання -->
             <header class="topbar">
-                <div class="topbar-info">
+                <div class="topbar-info" style="flex: 1;">
                     <h1 id="current-project-title" class="project-title">Оберіть проєкт</h1>
                     <p id="current-project-desc" class="project-desc"></p>
                 </div>
-                <button id="btn-add-task" class="btn-primary hidden"
-                        onclick="openModal('task')" aria-label="Додати нове завдання">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="2.5" width="15" height="15" aria-hidden="true">
-                        <path d="M12 5v14M5 12h14" />
-                    </svg>
-                    Додати завдання
-                </button>
+
+                <div class="search-wrapper" style="position: relative; flex: 1; max-width: 300px; margin-right: 16px;">
+                    <input type="search" id="global-search" class="form-input"
+                           placeholder="🔍 Знайти завдання..."
+                           autocomplete="off" oninput="handleGlobalSearch(event)"
+                           style="border-radius: 20px; padding: 7px 16px;">
+                    <div id="search-results" class="search-dropdown hidden"></div>
+                </div>
+
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button id="btn-add-task" class="btn-primary hidden"
+                            onclick="openModal('task')" aria-label="Додати нове завдання">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2.5" width="15" height="15" aria-hidden="true">
+                            <path d="M12 5v14M5 12h14" />
+                        </svg>
+                        Додати завдання
+                    </button>
+                    <button id="btn-close-board" class="btn-ghost hidden" onclick="closeBoard()"
+                            title="Закрити дошку" style="padding: 9px; min-width: auto;">
+                        ✕
+                    </button>
+                </div>
             </header>
 
             <!-- Порожній стан: показується коли жоден проєкт не обрано -->
@@ -168,6 +183,7 @@
     ║  МОДАЛЬНЕ ВІКНО: Новий проєкт               ║
     ╚══════════════════════════════════════════════╝
     -->
+    <input type="hidden" id="proj-id">
     <div id="modal-project" class="modal-overlay hidden"
          role="dialog" aria-modal="true" aria-labelledby="modal-project-heading"
          onclick="closeModalOnOverlay(event, 'project')">

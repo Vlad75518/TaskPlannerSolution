@@ -10,6 +10,8 @@ namespace TaskPlanner.BLL.Interfaces
         // Отримати всі завдання конкретного проєкту
         Task<IEnumerable<TaskItem>> GetTasksByProjectAsync(int projectId);
 
+        Task<IEnumerable<TaskItem>> SearchTasksAsync(string query);
+
         Task<TaskItem?> GetTaskByIdAsync(int taskId);
 
         // Додати нове завдання до проєкту
@@ -20,6 +22,7 @@ namespace TaskPlanner.BLL.Interfaces
 
         // Відредагувати завдання
         Task UpdateTaskAsync(TaskItem task);
+
         Task DeleteTaskAsync(int taskId);
     }
 }

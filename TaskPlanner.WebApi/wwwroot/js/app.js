@@ -89,6 +89,10 @@ async function apiCreateProject(name, description) {
     return apiRequest(`${API_BASE}/projects`, 'POST', { name, description });
 }
 
+async function apiUpdateProject(id, name, description) {
+    return apiRequest(`${API_BASE}/projects/${id}`, 'PUT', { name, description });
+}
+
 /** Видалити проєкт за ID. */
 async function apiDeleteProject(id) {
     return apiRequest(`${API_BASE}/projects/${id}`, 'DELETE');
@@ -182,24 +186,37 @@ function createProjectItem(project) {
     li.setAttribute('tabindex', '0');
     li.setAttribute('aria-label', `Проєкт: ${project.name}`);
 
-    // Назва проєкту (textContent захищає від XSS)
     const nameSpan = document.createElement('span');
     nameSpan.className = 'project-item-name';
     nameSpan.textContent = project.name;
 
-    // Кнопка видалення — видима при hover
+    const actionsDiv = document.createElement('div');
+    actionsDiv.style.display = 'flex';
+    actionsDiv.style.gap = '2px';
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'project-action-btn';
+    editBtn.title = 'Редагувати проєкт';
+    editBtn.textContent = '✎';
+    editBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        openEditProjectModal(project);
+    });
+
     const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'project-delete-btn';
+    deleteBtn.className = 'project-action-btn delete';
     deleteBtn.title = 'Видалити проєкт';
-    deleteBtn.setAttribute('aria-label', `Видалити проєкт «${project.name}»`);
     deleteBtn.textContent = '×';
     deleteBtn.addEventListener('click', e => {
-        e.stopPropagation(); // запобігаємо переходу на проєкт
+        e.stopPropagation();
         handleDeleteProject(project.id);
     });
 
+    actionsDiv.appendChild(editBtn);
+    actionsDiv.appendChild(deleteBtn);
+
     li.appendChild(nameSpan);
-    li.appendChild(deleteBtn);
+    li.appendChild(actionsDiv);
 
     // Клік по рядку = вибрати цей проєкт
     li.addEventListener('click', () => selectProject(project));
@@ -493,6 +510,7 @@ async function handleDeleteProject(id) {
  * Викликається кнопкою «Створити» в модальному вікні.
  */
 async function handleCreateProject() {
+    const id = document.getElementById('proj-id').value;
     const name = document.getElementById('proj-name').value.trim();
     if (!name) {
         document.getElementById('proj-name').focus();
@@ -501,13 +519,22 @@ async function handleCreateProject() {
     const description = document.getElementById('proj-desc').value.trim();
 
     try {
-        const res = await apiCreateProject(name, description);
-        if (res.ok) {
-            closeModal('project');
-            document.getElementById('proj-name').value = '';
-            document.getElementById('proj-desc').value = '';
-            await renderProjects();
+        if (id) {
+            // Редагування
+            await apiUpdateProject(id, name, description);
+            if (state.currentProjectId === Number(id)) {
+                document.getElementById('current-project-title').textContent = name;
+                document.getElementById('current-project-desc').textContent = description;
+            }
+        } else {
+            // Створення
+            await apiCreateProject(name, description);
         }
+        closeModal('project');
+        document.getElementById('proj-id').value = '';
+        document.getElementById('proj-name').value = '';
+        document.getElementById('proj-desc').value = '';
+        await renderProjects();
     } catch (err) {
         console.error('[TaskPlanner] handleCreateProject:', err);
     }
@@ -644,6 +671,97 @@ function selectPriority(value) {
         btn.setAttribute('aria-checked', isActive ? 'true' : 'false');
     });
 }
+
+// Відкрити модалку редагування проєкту
+function openEditProjectModal(project) {
+    document.getElementById('proj-id').value = project.id;
+    document.getElementById('proj-name').value = project.name;
+    document.getElementById('proj-desc').value = project.description || '';
+    document.getElementById('modal-project-heading').textContent = 'Редагувати проєкт';
+    openModal('project');
+}
+
+// Скидання модалки проєкту при новому відкритті
+const originalOpenModal = openModal;
+openModal = function (key) {
+    if (key === 'project' && !document.getElementById('proj-id').value) {
+        document.getElementById('proj-name').value = '';
+        document.getElementById('proj-desc').value = '';
+        document.getElementById('modal-project-heading').textContent = 'Новий проєкт';
+    }
+    originalOpenModal(key);
+}
+
+// Закрити дошку
+function closeBoard() {
+    state.currentProjectId = null;
+    document.getElementById('current-project-title').textContent = 'Оберіть проєкт';
+    document.getElementById('current-project-desc').textContent = '';
+    document.getElementById('empty-state').classList.remove('hidden');
+    document.getElementById('kanban-board').classList.add('hidden');
+    document.getElementById('btn-add-task').classList.add('hidden');
+    document.getElementById('btn-close-board').classList.add('hidden');
+
+    document.querySelectorAll('.project-item').forEach(item => item.classList.remove('active'));
+}
+
+// Зміна видимості кнопки закриття в selectProject
+const originalSelectProject = selectProject;
+selectProject = function (project) {
+    originalSelectProject(project);
+    document.getElementById('btn-close-board').classList.remove('hidden');
+}
+
+// ГЛОБАЛЬНИЙ ПОШУК
+let searchTimeout = null;
+async function handleGlobalSearch(e) {
+    const query = e.target.value.trim();
+    const dropdown = document.getElementById('search-results');
+
+    if (searchTimeout) clearTimeout(searchTimeout);
+
+    if (query.length < 2) {
+        dropdown.classList.add('hidden');
+        return;
+    }
+
+    searchTimeout = setTimeout(async () => {
+        try {
+            const res = await fetch(`${API_BASE}/search/tasks?q=${encodeURIComponent(query)}`);
+            if (!res.ok) return;
+            const tasks = await res.json();
+
+            dropdown.innerHTML = '';
+            if (tasks.length === 0) {
+                dropdown.innerHTML = '<div class="search-item" style="color: var(--text-muted)">Нічого не знайдено</div>';
+            } else {
+                tasks.forEach(task => {
+                    const item = document.createElement('div');
+                    item.className = 'search-item';
+                    item.innerHTML = `<div style="font-weight:600">${task.title}</div><div style="font-size:11px; color:var(--text-muted)">Статус: ${task.status === 0 ? 'Не розпочато' : task.status === 1 ? 'У виконанні' : 'Завершено'}</div>`;
+
+                    item.onclick = async () => {
+                        dropdown.classList.add('hidden');
+                        document.getElementById('global-search').value = '';
+                        // Знаходимо і перемикаємо на проєкт
+                        const projects = await fetchProjects();
+                        const p = projects.find(pr => pr.id === task.projectId);
+                        if (p) selectProject(p);
+                    };
+                    dropdown.appendChild(item);
+                });
+            }
+            dropdown.classList.remove('hidden');
+        } catch (err) { }
+    }, 300);
+}
+
+// Ховаємо пошук при кліку поза ним
+document.addEventListener('click', e => {
+    if (!e.target.closest('.search-wrapper')) {
+        document.getElementById('search-results')?.classList.add('hidden');
+    }
+});
 
 
 /* ════════════════════════════════════════════════════════

@@ -44,6 +44,22 @@ namespace TaskPlanner.WebApi.Controllers
             return StatusCode(201);
         }
 
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateProject(int id, [FromBody] CreateProjectDto updateDto)
+        {
+            try
+            {
+                var project = _mapper.Map<Project>(updateDto);
+                project.Id = id;
+                await _projectService.UpdateProjectAsync(project);
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
         // ДОДАНО: Метод DELETE для відповідності на "відмінно"
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteProject(int id)

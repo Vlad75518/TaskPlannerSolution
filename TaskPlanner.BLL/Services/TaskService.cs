@@ -26,6 +26,18 @@ namespace TaskPlanner.BLL.Services
             return allTasks.Where(t => t.ProjectId == projectId);
         }
 
+        public async Task<IEnumerable<TaskItem>> SearchTasksAsync(string query)
+        {
+            var allTasks = await _unitOfWork.Repository<TaskItem>().GetAllAsync();
+
+            if (string.IsNullOrWhiteSpace(query)) return new List<TaskItem>();
+
+            // Шукаємо по назві або опису (нечутливо до регістру)
+            return allTasks.Where(t =>
+                (t.Title != null && t.Title.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
+                (t.Description != null && t.Description.Contains(query, StringComparison.OrdinalIgnoreCase)));
+        }
+
         public async Task<TaskItem?> GetTaskByIdAsync(int taskId)
         {
             return await _unitOfWork.Repository<TaskItem>().GetByIdAsync(taskId);

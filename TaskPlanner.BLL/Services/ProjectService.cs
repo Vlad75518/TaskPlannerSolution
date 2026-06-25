@@ -35,6 +35,23 @@ namespace TaskPlanner.BLL.Services
             await _unitOfWork.CommitAsync();
         }
 
+        public async Task UpdateProjectAsync(Project project)
+        {
+            var repository = _unitOfWork.Repository<Project>();
+            var existingProject = await repository.GetByIdAsync(project.Id);
+
+            if (existingProject == null)
+            {
+                throw new ArgumentException($"Проєкт з ID {project.Id} не знайдено.");
+            }
+
+            existingProject.Name = project.Name;
+            existingProject.Description = project.Description;
+
+            repository.Update(existingProject);
+            await _unitOfWork.CommitAsync();
+        }
+
         public async Task DeleteProjectAsync(int id)
         {
             var repository = _unitOfWork.Repository<Project>();
