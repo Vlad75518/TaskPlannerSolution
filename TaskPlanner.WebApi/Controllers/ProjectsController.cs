@@ -1,7 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using TaskPlanner.BLL.Interfaces;
 using TaskPlanner.Core.DomainModels;
 using TaskPlanner.WebApi.DTOs;
@@ -37,31 +35,31 @@ namespace TaskPlanner.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create([FromBody] CreateProjectDto createDto)
+        public async Task<ActionResult> Create([FromBody] CreateProjectDto dto)
         {
-            var project = _mapper.Map<Project>(createDto);
+            var project = _mapper.Map<Project>(dto);
             await _projectService.AddProjectAsync(project);
-            return StatusCode(201);
+            return StatusCode(201); // 201 Created
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateProject(int id, [FromBody] CreateProjectDto updateDto)
+        public async Task<ActionResult> Update(int id, [FromBody] CreateProjectDto dto)
         {
             try
             {
-                var project = _mapper.Map<Project>(updateDto);
+                var project = _mapper.Map<Project>(dto);
                 project.Id = id;
                 await _projectService.UpdateProjectAsync(project);
-                return NoContent();
+                return NoContent(); // 204 No Content
             }
             catch (ArgumentException ex)
             {
-                return NotFound(ex.Message);
+                return NotFound(new { message = ex.Message });
             }
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteProject(int id)
+        public async Task<ActionResult> Delete(int id)
         {
             try
             {
@@ -70,7 +68,7 @@ namespace TaskPlanner.WebApi.Controllers
             }
             catch (ArgumentException ex)
             {
-                return NotFound(ex.Message);
+                return NotFound(new { message = ex.Message });
             }
         }
     }

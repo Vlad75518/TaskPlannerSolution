@@ -1,8 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using TaskPlanner.BLL.Interfaces;
 using TaskPlanner.Core.DomainModels;
 using TaskPlanner.WebApi.DTOs;
@@ -23,53 +20,60 @@ namespace TaskPlanner.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TaskItemDto>>> GetTasksForProject(int projectId)
+        public async Task<ActionResult<IEnumerable<TaskItemDto>>> GetTasks(int projectId)
         {
             var tasks = await _taskService.GetTasksByProjectAsync(projectId);
             return Ok(_mapper.Map<IEnumerable<TaskItemDto>>(tasks));
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateTask(int projectId, [FromBody] CreateTaskDto createDto)
+        public async Task<ActionResult> CreateTask(int projectId, [FromBody] SaveTaskDto dto)
         {
             try
             {
-                var taskItem = _mapper.Map<TaskItem>(createDto);
-                await _taskService.AddTaskAsync(projectId, taskItem);
+                var domainTask = _mapper.Map<TaskItem>(dto);
+                await _taskService.AddTaskAsync(projectId, domainTask);
                 return StatusCode(201);
             }
-            catch (ArgumentException ex) { return BadRequest(ex.Message); }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{taskId}")]
-        public async Task<ActionResult> UpdateTask(int projectId, int taskId, [FromBody] UpdateTaskDto updateDto)
+        public async Task<ActionResult> UpdateTask(int projectId, int taskId, [FromBody] SaveTaskDto dto)
         {
             try
             {
-                var taskItem = _mapper.Map<TaskItem>(updateDto);
-                taskItem.Id = taskId;
-                taskItem.ProjectId = projectId;
-                await _taskService.UpdateTaskAsync(taskItem);
+                var domainTask = _mapper.Map<TaskItem>(dto);
+                domainTask.Id = taskId;
+                domainTask.ProjectId = projectId; // Гарантуємо прив'язку до проєкту
+
+                await _taskService.UpdateTaskAsync(domainTask);
                 return NoContent();
             }
-            catch (ArgumentException ex) { return NotFound(ex.Message); }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{taskId}/status")]
-        public async Task<ActionResult> ChangeStatus(int projectId, int taskId, [FromBody] ChangeTaskStatusDto statusDto)
+        public async Task<ActionResult> ChangeTaskStatus(int projectId, int taskId, [FromBody] StatusUpdateDto dto)
         {
             try
             {
-                await _taskService.ChangeTaskStatusAsync(taskId, statusDto.NewStatus);
+                // Тут ми отримуємо статус (0, 1, 2) як int і передаємо в BLL
+                await _taskService.ChangeTaskStatusAsync(taskId, dto.NewStatus);
                 return NoContent();
             }
-            catch (ArgumentException ex) 
+            catch (ArgumentException ex)
             {
-                return NotFound(ex.Message); 
+                return NotFound(new { message = ex.Message });
             }
         }
 
-        
         [HttpDelete("{taskId}")]
         public async Task<ActionResult> DeleteTask(int projectId, int taskId)
         {
@@ -80,7 +84,7 @@ namespace TaskPlanner.WebApi.Controllers
             }
             catch (ArgumentException ex)
             {
-                return NotFound(ex.Message);
+                return NotFound(new { message = ex.Message });
             }
         }
     }

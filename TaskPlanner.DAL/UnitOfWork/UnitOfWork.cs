@@ -55,7 +55,7 @@ namespace TaskPlanner.DAL.UnitOfWork
             return (IRepository<TDomain>)_repositories[type];
         }
 
-        public async Task<int> CommitAsync()
+        public async Task<int> CompleteAsync()
         {
             return await _context.SaveChangesAsync();
         }

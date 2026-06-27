@@ -2,7 +2,7 @@
 
 namespace TaskPlanner.WebApi.DTOs
 {
-    public class ChangeTaskStatusDto
+    public class StatusUpdateDto
     {
         public TaskItemStatus NewStatus { get; set; }
     }

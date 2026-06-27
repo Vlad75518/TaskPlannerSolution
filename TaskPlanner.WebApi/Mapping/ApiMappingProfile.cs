@@ -14,8 +14,9 @@ namespace TaskPlanner.WebApi.Mapping
 
             // Мапінг завдань
             CreateMap<TaskItem, TaskItemDto>();
-            CreateMap<CreateTaskDto, TaskItem>();
-            CreateMap<UpdateTaskDto, TaskItem>();
+
+            // ВАЖЛИВО: Оновлений мапінг для збереження (заміняє Create та Update)
+            CreateMap<SaveTaskDto, TaskItem>();
         }
     }
 }
